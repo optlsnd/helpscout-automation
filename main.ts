@@ -83,6 +83,8 @@ const handler = async (req: Request): Promise<Response> => {
     });
   }
 
+  console.log(JSON.stringify(payload));
+
   return new Response(null, {
     status: 200,
   });
