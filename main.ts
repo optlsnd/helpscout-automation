@@ -95,7 +95,9 @@ const handler = async (req: Request): Promise<Response> => {
     for await (const task of kv.list({ prefix: ["tasks"] })) {
       const reopenDate = new Date(task.value.reopenDate).toUTCString();
       const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
-      tasks.push(`${conversationLink}: <span>${reopenDate}</span>`);
+      tasks.push(
+        `<div>${conversationLink}:&nbsp;<span>${reopenDate}</span></div>`
+      );
     }
     return new Response(tasks.join("\n"), {
       status: 200,
