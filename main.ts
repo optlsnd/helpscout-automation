@@ -95,10 +95,13 @@ const handler = async (req: Request): Promise<Response> => {
     for await (const task of kv.list({ prefix: ["tasks"] })) {
       const reopenDate = new Date(task.value.reopenDate).toUTCString();
       const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
-      tasks.push(`${conversationLink}: ${reopenDate}`);
+      tasks.push(`${conversationLink}: <span>${reopenDate}</span>`);
     }
     return new Response(tasks.join("\n"), {
       status: 200,
+      headers: {
+        "Content-Type": "text/html",
+      },
     });
   }
 
