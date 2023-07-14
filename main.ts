@@ -11,6 +11,7 @@ const HS_APP_SECRET = Deno.env.get("HS_APP_SECRET") || "";
 
 const HS_AUTH_ENDPOINT = "https://api.helpscout.net/v2/oauth2/token";
 const HS_CONVERSATION_ENDPOINT = "https://api.helpscout.net/v2/conversations/";
+const HS_DASHBOARD_ENDPOINT = "https://secure.helpscout.net/conversation/";
 
 const COMMANDS = {
   REOPEN: "REOPEN",
@@ -93,7 +94,8 @@ const handler = async (req: Request): Promise<Response> => {
     const tasks = [];
     for await (const task of kv.list({ prefix: ["tasks"] })) {
       const reopenDate = new Date(task.value.reopenDate).toUTCString();
-      tasks.push(`${task.key[1]}: ${reopenDate}`);
+      const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
+      tasks.push(`${conversationLink}: ${reopenDate}`);
     }
     return new Response(tasks.join("\n"), {
       status: 200,
@@ -148,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log(reopenDate);
       if (isDate(reopenDate)) {
         await kv.set(["tasks", id], {
-          reopenDate: Math.floor(new Date(reopenDate).getTime()),
+          reopenDate: new Date(reopenDate).getTime(),
         });
         console.log("OK", id, preview, status);
         for await (const task of kv.list({ prefix: ["tasks"] })) {
