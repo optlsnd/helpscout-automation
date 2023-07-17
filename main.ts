@@ -100,9 +100,11 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
     const html = `
-    <h1>Conversations pending opening</h1>
-    <br/>
-    ${tasks.join("\n")}
+    <div style="font-family: sans-serif">
+      <h1>Conversations pending opening</h1>
+      <hr/>
+      ${tasks.join("\n")}
+    </div>
     `;
     return new Response(html, {
       status: 200,
