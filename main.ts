@@ -99,7 +99,12 @@ const handler = async (req: Request): Promise<Response> => {
         `<div>${conversationLink}:&nbsp;<span>${reopenDate}</span></div>`
       );
     }
-    return new Response(tasks.join("\n"), {
+    const html = `
+    <h1>Conversations pending opening</h1>
+    <br/>
+    ${tasks.join("\n")}
+    `;
+    return new Response(html, {
       status: 200,
       headers: {
         "Content-Type": "text/html",
