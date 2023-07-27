@@ -17,6 +17,10 @@ const COMMANDS = {
   REOPEN: "REOPEN",
 };
 
+interface Task {
+  reopenDate: number;
+}
+
 function isDate(dateString: string) {
   return !isNaN(new Date(dateString).getDate());
 }
@@ -72,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (method === "HEAD") {
     const currentDate = Date.now();
     const tasks = [];
-    for await (const task of kv.list({ prefix: ["tasks"] })) {
+    for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
       console.log(task.value.reopenDate, currentDate);
       if (task.value.reopenDate <= currentDate) {
         tasks.push(task.key[1]);
@@ -90,20 +94,71 @@ const handler = async (req: Request): Promise<Response> => {
     });
   }
 
+  // Task view
   if (method === "GET") {
     const tasks = [];
-    for await (const task of kv.list({ prefix: ["tasks"] })) {
+    for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
       const reopenDate = new Date(task.value.reopenDate).toUTCString();
       const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
       tasks.push(
-        `<div>${conversationLink}:&nbsp;<span>${reopenDate}</span></div>`
+        `<tr>
+          <td>${conversationLink}</td>
+          <td>${reopenDate}</td>
+        </tr>`
       );
     }
     const html = `
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        color: #333333;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        text-align: left;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        margin: auto;
+        margin-top: 50px;
+        margin-bottom: 50px;
+      }
+      table th {
+        background-color: #333333;
+        color: #ffffff;
+        font-weight: bold;
+        padding: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-top: 1px solid #fff;
+        border-bottom: 1px solid #cccccc;
+      }
+      table tr:nth-child(even) td {
+        background-color: #f2f2f2;
+      }
+      table tr:hover td {
+        background-color: #ffedcc;
+      }
+      table td {
+        background-color: #ffffff;
+        padding: 10px;
+        border-bottom: 1px solid #cccccc;
+        font-weight: bold;
+      }
+    </style>
     <div style="font-family: sans-serif">
-      <h1>Conversations pending opening</h1>
+      <h1></h1>
       <hr/>
-      ${tasks.join("\n")}
+      <table>
+        <thead>
+          <tr>
+            <th colspan="2">Conversations pending opening</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tasks.join("\n")}
+        </tbody>
+      </table>
     </div>
     `;
     return new Response(html, {
@@ -165,7 +220,7 @@ const handler = async (req: Request): Promise<Response> => {
           reopenDate: new Date(reopenDate).getTime(),
         });
         console.log("OK", id, preview, status);
-        for await (const task of kv.list({ prefix: ["tasks"] })) {
+        for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
           console.log(task.key[1], task.value.reopenDate);
         }
       }
