@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (method === "GET") {
     const tasks = [];
     for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
-      const reopenDate = new Date(task.value.reopenDate).toUTCString();
+      const reopenDate = new Date(task.value.reopenDate).toDateString();
       const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
       tasks.push(
         `<tr>
@@ -147,12 +147,13 @@ const handler = async (req: Request): Promise<Response> => {
       }
     </style>
     <div style="font-family: sans-serif">
-      <h1></h1>
+      <h1>Conversations pending opening</h1>
       <hr/>
       <table>
         <thead>
           <tr>
-            <th colspan="2">Conversations pending opening</th>
+            <th>Conversation ID</th>
+            <th>Reopen date</th>
           </tr>
         </thead>
         <tbody>
