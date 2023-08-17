@@ -96,17 +96,23 @@ const handler = async (req: Request): Promise<Response> => {
 
   // Task view
   if (method === "GET") {
-    const tasks = [];
+    let tasks = [];
     for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
+      tasks.push(task);
+    }
+
+    // Sort tasks
+    tasks.sort((a, b) => a.value.reopenDate - b.value.reopenDate);
+
+    tasks = tasks.map((task) => {
       const reopenDate = new Date(task.value.reopenDate).toDateString();
       const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
-      tasks.push(
-        `<tr>
+      return `<tr>
           <td>${conversationLink}</td>
           <td>${reopenDate}</td>
-        </tr>`
-      );
-    }
+        </tr>`;
+    });
+
     const html = `
     <style>
       table {
