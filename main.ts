@@ -122,11 +122,9 @@ const handler = async (req: Request): Promise<Response> => {
         font-family: Arial, sans-serif;
         font-size: 14px;
         text-align: left;
-        border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         margin: auto;
-        margin-top: 50px;
         margin-bottom: 50px;
       }
       table th {
@@ -145,6 +143,10 @@ const handler = async (req: Request): Promise<Response> => {
       table tr:hover td {
         background-color: #ffedcc;
       }
+      table thead th:nth-of-type(1) {
+        width: 20%;
+        max-width: 200px;
+      }
       table td {
         background-color: #ffffff;
         padding: 10px;
@@ -153,8 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     </style>
     <div style="font-family: sans-serif">
-      <h1>Conversations pending opening</h1>
-      <hr/>
+      <h1>Snoozed conversations</h1>
       <table>
         <thead>
           <tr>
