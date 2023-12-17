@@ -3,7 +3,6 @@ import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
 const kv = await Deno.openKv();
 
-const PORT = Number(Deno.env.get("port")) || 3000;
 const HS_SECRET = Deno.env.get("HS_SECRET") || "";
 const HS_APP_ID = Deno.env.get("HS_APP_ID") || "";
 const HS_APP_SECRET = Deno.env.get("HS_APP_SECRET") || "";
@@ -244,9 +243,4 @@ Deno.cron("Reopen conversations", "0 0 * * *", async () => {
 });
 
 // Start server
-Deno.serve(
-  {
-    port: PORT,
-  },
-  handler
-);
+Deno.serve(handler);
