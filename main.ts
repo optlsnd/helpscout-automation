@@ -224,7 +224,7 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 // Reopen conversation recurring job
-Deno.cron("Reopen conversations", "0 0 * * *", async () => {
+Deno.cron("Reopen conversations", "0 */3 * * *", async () => {
   const currentDate = Date.now();
   const tasks = [];
   for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
