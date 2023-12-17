@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
 
@@ -71,24 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
   const { headers, method } = req;
   const hsSignature = headers.get("X-HelpScout-Signature");
 
-  console.log(method);
-
   if (method === "HEAD") {
-    const currentDate = Date.now();
-    const tasks = [];
-    for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
-      console.log(task.value.reopenDate, currentDate);
-      if (task.value.reopenDate <= currentDate) {
-        tasks.push(task.key[1]);
-      }
-    }
-    if (tasks.length) {
-      const token = await getAccessToken(HS_APP_ID, HS_APP_SECRET);
-      tasks.forEach(async (task) => {
-        await reopenConversation(HS_CONVERSATION_ENDPOINT + task, token);
-        await kv.delete(["tasks", task]);
-      });
-    }
     return new Response(null, {
       status: 200,
     });
@@ -106,7 +88,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     tasks = tasks.map((task) => {
       const reopenDate = new Date(task.value.reopenDate).toDateString();
-      const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${task.key[1]}">${task.key[1]}</a>`;
+      const conversationLink = `<a href="${HS_DASHBOARD_ENDPOINT}${
+        task.key[1] as string
+      }">${task.key[1] as string}</a>`;
       return `<tr>
           <td>${conversationLink}</td>
           <td>${reopenDate}</td>
@@ -240,4 +224,29 @@ const handler = async (req: Request): Promise<Response> => {
   });
 };
 
-serve(handler, { port: PORT });
+// Reopen conversation recurring job
+Deno.cron("Reopen conversations", "0 0 * * *", async () => {
+  const currentDate = Date.now();
+  const tasks = [];
+  for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
+    console.log(task.value.reopenDate, currentDate);
+    if (task.value.reopenDate <= currentDate) {
+      tasks.push(task.key[1] as string);
+    }
+  }
+  if (tasks.length) {
+    const token = await getAccessToken(HS_APP_ID, HS_APP_SECRET);
+    tasks.forEach(async (task) => {
+      await reopenConversation(`${HS_CONVERSATION_ENDPOINT}${task}`, token);
+      await kv.delete(["tasks", task]);
+    });
+  }
+});
+
+// Start server
+Deno.serve(
+  {
+    port: PORT,
+  },
+  handler
+);
