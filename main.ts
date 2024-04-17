@@ -72,10 +72,12 @@ const handler = async (req: Request): Promise<Response> => {
   const { pathname } = new URL(url);
   const deleteEndpointRegex = /^\/api\/delete\/\d+$/gi;
 
+  // Delete task handler
   if (deleteEndpointRegex.test(pathname) && method === "DELETE") {
-    const task = pathname.split("/").pop() ?? "";
-    console.log(task);
-    await kv.delete(["tasks", task]);
+    const taskId = pathname.split("/").pop() ?? "";
+    const task = await kv.get(["tasks", taskId]);
+    console.log("Deleting task: ", task);
+    await kv.delete(["tasks", taskId]);
     return new Response(null, {
       status: 200,
     });
