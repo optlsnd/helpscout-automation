@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   // Delete task handler
   if (deleteEndpointRegex.test(pathname) && method === "DELETE") {
-    const taskId = pathname.split("/").pop() ?? "";
+    const taskId = parseInt(pathname.split("/").pop() ?? "");
     const task = await kv.get(["tasks", taskId]);
     console.log("Deleting task: ", task);
     await kv.delete(["tasks", taskId]);
