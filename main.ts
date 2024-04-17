@@ -66,8 +66,20 @@ const reopenConversation = async (
 
 // Request handler
 const handler = async (req: Request): Promise<Response> => {
-  const { headers, method } = req;
+  const { headers, method, url } = req;
   const hsSignature = headers.get("X-HelpScout-Signature");
+
+  const { pathname } = new URL(url);
+  const deleteEndpointRegex = /^\/api\/delete\/\d+$/gi;
+
+  if (deleteEndpointRegex.test(pathname) && method === "DELETE") {
+    const task = pathname.split("/").pop() ?? "";
+    console.log(task);
+    await kv.delete(["tasks", task]);
+    return new Response(null, {
+      status: 200,
+    });
+  }
 
   if (method === "HEAD") {
     return new Response(null, {
@@ -202,18 +214,15 @@ const handler = async (req: Request): Promise<Response> => {
   const isCommand = preview[0] === "#";
   if (isCommand) {
     const command = preview.slice(1).split("@")[0];
-    console.log(command);
+    console.log("Command received: ", command);
     if (command === COMMANDS.REOPEN) {
       const reopenDate = preview.slice(1).split("@")[1];
-      console.log(reopenDate);
+      console.log("Reopen date: ", reopenDate);
       if (isDate(reopenDate)) {
         await kv.set(["tasks", id], {
           reopenDate: new Date(reopenDate).getTime(),
         });
         console.log("OK", id, preview, status);
-        for await (const task of kv.list<Task>({ prefix: ["tasks"] })) {
-          console.log(task.key[1], task.value.reopenDate);
-        }
       }
     }
   }
