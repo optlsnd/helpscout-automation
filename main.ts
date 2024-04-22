@@ -117,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
         width: 100%;
         color: #333333;
         font-family: Arial, sans-serif;
-        font-size: 14px;
+        font-size: 12px;
         text-align: left;
         overflow: hidden;
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -152,11 +152,10 @@ const handler = async (req: Request): Promise<Response> => {
       }
     </style>
     <div style="font-family: sans-serif">
-      <h1>Snoozed conversations</h1>
       <table>
         <thead>
           <tr>
-            <th>Conversation ID</th>
+            <th>ID</th>
             <th>Reopen date</th>
           </tr>
         </thead>
